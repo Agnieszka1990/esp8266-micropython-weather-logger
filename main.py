@@ -1,4 +1,4 @@
-# import webrepl_setup   # 1madc777
+# import webrepl_setup
 
 # Micropython | Board
 # 0|D3
@@ -13,12 +13,41 @@
 # 15|D8
 # 16|D0 (also Led2 but inverse)
 
+import gc
+
+gc.collect()
+gc.mem_free()
+
+# NETWORK STATUS {
+
+import network
+import utime
+
+sta_if = network.WLAN(network.STA_IF)
+sta_if.active(True)
+networks = sta_if.scan()
+networks.sort(key=lambda x: -x[3])
+# sta_if.connect("<AP_name>", "<password>") # Connect to an AP
+ap_if = network.WLAN(network.AP_IF)
+# ap_if.active(False)
+
+
+print("Available networks")
+for i in networks:
+    print(i)
+
+utime.sleep(2)
+print("Connected to WiFI = {}".format(sta_if.isconnected()))  # Check for successful connection
+print("sta_if.ifconfig() = {}".format(sta_if.ifconfig()))
+print("ap_if.ifconfig() = {}".format(ap_if.ifconfig()))
+
+# } # NETWORK STATUS
+
 
 # MEASUREMENTS {
 
 import dht
 import machine
-import utime
 
 d = dht.DHT11(machine.Pin(5))  # D1
 p = machine.Pin(4, machine.Pin.OUT)
@@ -38,6 +67,8 @@ def pomiar():
     # utime.sleep_ms(250)
     p.off()
     brzeczyk.deinit()
+    gc.collect()
+    print("gc.mem_free() = {}".format(gc.mem_free()))
 
 
 t = machine.Timer(-1)
