@@ -48,10 +48,15 @@ print("ap_if.ifconfig() = {}".format(ap_if.ifconfig()))
 
 import dht
 import machine
+import ntptime
+
+ntptime.settime()
+timeoffset = 2  # TODO: determine time zone automatically.
 
 d = dht.DHT11(machine.Pin(5))  # D1
 p = machine.Pin(4, machine.Pin.OUT)
 brzeczyk = machine.PWM(machine.Pin(0))
+rtc = machine.RTC()
 
 log = list()
 
@@ -61,7 +66,9 @@ def pomiar():
     brzeczyk.duty(512)
     p.on()
     d.measure()
-    lt = {'temperatura': d.temperature(), 'wilgotnosc': d.humidity()}
+    tt = rtc.datetime()
+    tstring = "{}.{:02d}.{:02d} {:02d}:{:02d}:{:02d}".format(tt[0], tt[1], tt[2], tt[4] + timeoffset, tt[5], tt[6])
+    lt = {'czas': tstring, 'temperatura': d.temperature(), 'wilgotnosc': d.humidity()}
     log.append(lt)
     print(lt)
     # utime.sleep_ms(250)
