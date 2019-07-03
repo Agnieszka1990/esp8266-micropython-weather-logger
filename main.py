@@ -75,3 +75,50 @@ t = machine.Timer(-1)
 t.init(period=int(30 * 1000), mode=machine.Timer.PERIODIC, callback=lambda f: pomiar())
 
 # } # MEASUREMENTS
+
+
+# SERVER {
+
+html1 = """<!DOCTYPE html>
+<meta http-equiv="refresh" content="30" />
+<html>
+    <head> <title>ESP8266 log</title> </head>
+    <body> <h1>ESP8266 log</h1>
+        <table border="1"> <tr><th>wilgotnosc</th><th>temperatura</th></tr> 
+"""
+
+html2 = """
+        </table>
+    </body>
+</html>
+"""
+
+import socket
+
+addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+
+s = socket.socket()
+s.bind(addr)
+s.listen(1)
+
+print('listening on', addr)
+
+while True:
+    cl, addr = s.accept()
+    print('client connected from', addr)
+    cl_file = cl.makefile('rwb', 0)
+    while True:
+        line = cl_file.readline()
+        if not line or line == b'\r\n':
+            break
+    rows = ['            <tr><td>%s</td><td>%d</td></tr>\n' % (ll['temperatura'], ll['wilgotnosc']) for ll in log]
+
+    cl.send(html1)
+    for i, r in enumerate(rows):
+        send_status = cl.send(r)
+        print("Sent ok log of size {} (chunk: {}, status: {})".format(len(r), i, send_status))
+
+    cl.send(html2)
+    cl.close()
+
+# } # SERVER
