@@ -36,7 +36,7 @@ print("Available networks")
 for i in networks:
     print(i)
 
-utime.sleep(2)
+utime.sleep(5)
 print("Connected to WiFI = {}".format(sta_if.isconnected()))  # Check for successful connection
 print("sta_if.ifconfig() = {}".format(sta_if.ifconfig()))
 print("ap_if.ifconfig() = {}".format(ap_if.ifconfig()))
@@ -91,7 +91,7 @@ html1 = """<!DOCTYPE html>
 <html>
     <head> <title>ESP8266 log</title> </head>
     <body> <h1>ESP8266 log</h1>
-        <table border="1"> <tr><th>wilgotnosc</th><th>temperatura</th></tr> 
+        <table border="1"> <tr><th>czas</th><th>wilgotnosc</th><th>temperatura</th></tr> 
 """
 
 html2 = """
@@ -118,7 +118,7 @@ while True:
         line = cl_file.readline()
         if not line or line == b'\r\n':
             break
-    rows = ['            <tr><td>%s</td><td>%d</td></tr>\n' % (ll['temperatura'], ll['wilgotnosc']) for ll in log]
+    rows = ['            <tr><td>%s</td><td>%s</td><td>%d</td></tr>\n' % (ll['czas'], ll['temperatura'], ll['wilgotnosc']) for ll in log]
 
     cl.send(html1)
     for i, r in enumerate(rows):
