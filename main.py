@@ -91,7 +91,7 @@ html1 = """<!DOCTYPE html>
 <html>
     <head> <title>ESP8266 log</title> </head>
     <body> <h1>ESP8266 log</h1>
-        <table border="1"> <tr><th>czas</th><th>wilgotnosc</th><th>temperatura</th></tr> 
+        <table border="1"> <tr><th>czas</th><th>temperatura</th><th>wilgotnosc</th></tr> 
 """
 
 html2 = """
