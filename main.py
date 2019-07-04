@@ -118,7 +118,9 @@ while True:
         line = cl_file.readline()
         if not line or line == b'\r\n':
             break
-    rows = ['            <tr><td>%s</td><td>%s</td><td>%d</td></tr>\n' % (ll['czas'], ll['temperatura'], ll['wilgotnosc']) for ll in log]
+    rows = [
+        '            <tr><td>%s</td><td>%d</td><td>%d</td></tr>\n' % (ll['czas'], ll['temperatura'], ll['wilgotnosc'])
+        for ll in log]
 
     cl.send(html1)
     for i, r in enumerate(rows):
