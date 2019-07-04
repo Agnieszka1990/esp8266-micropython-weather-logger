@@ -50,7 +50,11 @@ import dht
 import machine
 import ntptime
 
-ntptime.settime()
+try:
+    ntptime.settime()
+except Exception as e:
+    print("Couldn't connect to time server ({}).".format(e))
+
 timeoffset = 2  # TODO: determine time zone automatically.
 
 d = dht.DHT11(machine.Pin(5))  # D1
@@ -65,12 +69,17 @@ def pomiar():
     brzeczyk.freq(500)
     brzeczyk.duty(512)
     p.on()
-    d.measure()
     tt = utime.localtime(ntptime.time() + timeoffset * 60 * 60)
     tstring = "{}.{:02d}.{:02d} {:02d}:{:02d}:{:02d}".format(tt[0], tt[1], tt[2], tt[3], tt[4], tt[5])
-    lt = {'czas': tstring, 'temperatura': d.temperature(), 'wilgotnosc': d.humidity()}
-    log.append(lt)
-    print(lt)
+
+    try:
+        d.measure()
+        lt = {'czas': tstring, 'temperatura': d.temperature(), 'wilgotnosc': d.humidity()}
+        log.append(lt)
+        print(lt)
+    except Exception as e:
+        print("Problem while reading data from DHT11: {}".format(e))
+
     # utime.sleep_ms(250)
     p.off()
     brzeczyk.deinit()
@@ -111,23 +120,32 @@ s.listen(1)
 print('listening on', addr)
 
 while True:
-    cl, addr = s.accept()
-    print('client connected from', addr)
-    cl_file = cl.makefile('rwb', 0)
-    while True:
-        line = cl_file.readline()
-        if not line or line == b'\r\n':
-            break
-    rows = [
-        '            <tr><td>%s</td><td>%d</td><td>%d</td></tr>\n' % (ll['czas'], ll['temperatura'], ll['wilgotnosc'])
-        for ll in log]
+    try:
+        gc.collect()
+        cl, addr = s.accept()
+        print('client connected from', addr)
+        cl_file = cl.makefile('rwb', 0)
+        while True:
+            line = cl_file.readline()
+            if not line or line == b'\r\n':
+                break
+        rows = [
+            '            <tr><td>%s</td><td>%d</td><td>%d</td></tr>\n' % (
+            ll['czas'], ll['temperatura'], ll['wilgotnosc'])
+            for ll in log]
 
-    cl.send(html1)
-    for i, r in enumerate(rows):
-        send_status = cl.send(r)
-        print("Sent ok log of size {} (chunk: {}, status: {})".format(len(r), i, send_status))
+        gc.collect()
+        cl.send(html1)
+        utime.sleep_ms(50)
+        for i, r in enumerate(rows):
+            gc.collect()
+            send_status = cl.send(r)
+            print("Sent ok log of size {} (chunk: {}, status: {})".format(len(r), i, send_status))
+            utime.sleep_ms(50)
 
-    cl.send(html2)
-    cl.close()
+        cl.send(html2)
+        cl.close()
+    except Exception as e:
+        print("Problem in http server: {}".format(e))
 
 # } # SERVER
