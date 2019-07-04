@@ -66,8 +66,8 @@ def pomiar():
     brzeczyk.duty(512)
     p.on()
     d.measure()
-    tt = rtc.datetime()
-    tstring = "{}.{:02d}.{:02d} {:02d}:{:02d}:{:02d}".format(tt[0], tt[1], tt[2], tt[4] + timeoffset, tt[5], tt[6])
+    tt = utime.localtime(ntptime.time() + timeoffset * 60 * 60)
+    tstring = "{}.{:02d}.{:02d} {:02d}:{:02d}:{:02d}".format(tt[0], tt[1], tt[2], tt[3], tt[4], tt[5])
     lt = {'czas': tstring, 'temperatura': d.temperature(), 'wilgotnosc': d.humidity()}
     log.append(lt)
     print(lt)
